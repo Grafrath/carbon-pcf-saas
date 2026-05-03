@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. 배출계수 테이블 (정수형 버전 관리)
+model EmissionFactor {
+  id           String   @id @default(cuid())
+  category     String   // 전기, 원소재, 운송
+  name         String   // 한국전력 기본값, 플라스틱 1 등
+  value        Float    // 계수 값
+  unit         String   // 단위 (kgCO2e / 단위)
+  version      Int      @default(1) // 1, 2, 3... (옵션 A 반영)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  activities   ActivityData[]
+}
+
+// 2. 활동 데이터 테이블
+model ActivityData {
+  id               String   @id @default(cuid())
+  date             DateTime
+  type             String
+  description      String
+  amount           Float
+  unit             String
+  
+  // 계산 결과 스냅샷
+  emissionFactorId String?
+  emissionFactor   EmissionFactor? @relation(fields: [emissionFactorId], references: [id])
+  totalEmission    Float?   
+  
+  createdAt        DateTime @default(now())
+}
