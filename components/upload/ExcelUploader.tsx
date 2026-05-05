@@ -27,7 +27,6 @@ interface ValidationError {
     errors: string[];
 }
 
-// 2. TypeScript 에러 해결을 위한 Props 인터페이스 추가
 interface ExcelUploaderProps {
     onUploadSuccess: () => void;
 }
@@ -36,6 +35,7 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
     // 모달 창 열림/닫힘 상태 관리
     const [isOpen, setIsOpen] = useState(false);
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [data, setData] = useState<ActivityData[]>([]);
     const [errors, setErrors] = useState<ValidationError[]>([]);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -57,13 +57,16 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
         if (!file) return;
 
         const reader = new FileReader();
+
         reader.onload = (event) => {
             const resultData = event.target?.result;
-            const workbook = XLSX.read(resultData, { type: 'binary', cellDates: true });
+
+            const workbook = XLSX.read(resultData, { type: 'array', cellDates: true });
+
             const targetSheetName = workbook.SheetNames[1];
 
             if (!targetSheetName) {
-                setErrors([{ row: 0, errors: ["두 번째 시트(과제용 데이터)를 찾을 수 없습니다."] }]);
+                setErrors([{ row: 0, errors: ["엑셀 시트를 찾을 수 없습니다."] }]);
                 return;
             }
 
@@ -97,16 +100,60 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
             setErrors(validationErrors);
             setIsSuccess(validationErrors.length === 0 && parsedData.length > 0);
         };
+
+        reader.readAsArrayBuffer(file);
     };
 
     // 4. 최종 전송 처리
-    const handleSubmit = () => {
-        // 실제 DB 연동 API 호출 로직이 들어갈 자리.
-        console.log("DB로 전송할 데이터:", data);
+    const handleSubmit = async () => {
+        if (data.length === 0) return;
 
-        // 성공 알림, 모달 닫기
-        onUploadSuccess();
-        handleClose();
+        setIsSubmitting(true);
+
+        try {
+            // POST API 호출
+            const response = await fetch('/api/activities', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                // 에러 발생 시 알림창
+                const errorMsg = result.details ? result.details.join('\n') : result.error;
+                alert(`데이터 저장 실패:\n\n${errorMsg}`);
+                return;
+            }
+
+            // 성공 시
+            alert(`총 ${result.count}개의 데이터가 성공적으로 저장되었습니다!`);
+            onUploadSuccess();
+            handleClose();
+
+        } catch (error) {
+            console.error('업로드 에러:', error);
+            alert('네트워크 오류가 발생하여 데이터를 전송하지 못했습니다.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const renderSubmitButtonContent = () => {
+        if (isSubmitting) {
+            return '데이터를 전송하고 있습니다...';
+        }
+
+        if (isSuccess) {
+            return (
+                <>
+                    <CheckCircle2 className="mr-2 w-4 h-4" /> DB로 데이터 전송
+                </>
+            );
+        }
+
+        return '오류를 수정해 주세요';
     };
 
     return (
@@ -223,19 +270,20 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
 
                         {/* 모달 푸터 */}
                         <div className="px-8 py-5 border-t border-zinc-100 bg-zinc-50 flex justify-end gap-3">
-                            <Button variant="ghost" onClick={handleClose} className="text-zinc-500 hover:text-zinc-700">
+                            <Button
+                                variant="ghost"
+                                onClick={handleClose}
+                                disabled={isSubmitting} // 전송 중일 때 취소 막기
+                                className="text-zinc-500 hover:text-zinc-700"
+                            >
                                 취소
                             </Button>
                             <Button
                                 onClick={handleSubmit}
-                                disabled={!isSuccess}
+                                disabled={!isSuccess || isSubmitting}
                                 className={`${isSuccess ? 'bg-lime-600 hover:bg-lime-700 text-white' : 'bg-zinc-200 text-zinc-400'}`}
                             >
-                                {isSuccess ? (
-                                    <><CheckCircle2 className="mr-2 w-4 h-4" /> DB로 데이터 전송</>
-                                ) : (
-                                    '오류를 수정해 주세요'
-                                )}
+                                {renderSubmitButtonContent()}
                             </Button>
                         </div>
 
