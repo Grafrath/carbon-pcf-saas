@@ -1,3 +1,5 @@
+// J:\edu\carbon-pcf-saas\prisma\schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,33 +8,36 @@ datasource db {
   provider = "postgresql"
 }
 
-// 1. 배출계수 테이블 (정수형 버전 관리)
+// 1. 배출계수 테이블
 model EmissionFactor {
-  id           String   @id @default(cuid())
-  category     String   // 전기, 원소재, 운송
-  name         String   // 한국전력 기본값, 플라스틱 1 등
-  value        Float    // 계수 값
-  unit         String   // 단위 (kgCO2e / 단위)
-  version      Int      @default(1) // 1, 2, 3... (옵션 A 반영)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  activities   ActivityData[]
+  id         String   @id @default(cuid())
+  category   String   // 전기, 원소재, 운송 (UI 필터링 기준)
+  name       String   // 한국전력 기본값, 플라스틱 1 등 (상세 설명)
+  value      Float    // 계수 값 (kgCO2e 기준)
+  unit       String   // 단위 (kWh, kg, ton-km 등)
+  version    Int      @default(1)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  activities ActivityData[]
 }
 
 // 2. 활동 데이터 테이블
 model ActivityData {
   id               String   @id @default(cuid())
-  date             DateTime
-  type             String
-  description      String
-  amount           Float
-  unit             String
+  date             DateTime // 활동 발생 일자
+  category         String   // UI 탭 메뉴 및 필터링용 (전기, 원소재 등)
+  description      String   // 활동에 대한 추가 설명 (예: 한국전력 1월분)
+  usage            Float    // 사용량
+  unit             String   // 입력 단위
+
+  // 배출계수와의 관계
+  emissionFactorId String
+  emissionFactor   EmissionFactor @relation(fields: [emissionFactorId], references: [id])
   
-  // 계산 결과 스냅샷
-  emissionFactorId String?
-  emissionFactor   EmissionFactor? @relation(fields: [emissionFactorId], references: [id])
+  // 필요 시 스냅샷 저장
   totalEmission    Float?   
-  
+
   createdAt        DateTime @default(now())
 }

@@ -7,8 +7,8 @@ services:
     container_name: carbon_db
     restart: always
     environment:
-      POSTGRES_USER: grafrath
-      POSTGRES_PASSWORD: password123
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin1234
       POSTGRES_DB: carbon_pcf_saas
     ports:
       - "5432:5432"
