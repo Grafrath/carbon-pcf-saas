@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-// 1. 데이터 검증 스키마 (기존과 동일)
+// 1. 데이터 검증 스키마
 const activitySchema = z.object({
     date: z.string().min(1, "일자는 필수입니다."),
     type: z.enum(["전기", "원소재", "운송"]).refine(
@@ -51,7 +51,7 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
         }, 200);
     };
 
-    // 3. 엑셀 파일 처리 함수 (기존 로직 완벽 유지)
+    // 3. 엑셀 파일 처리 함수
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -101,17 +101,17 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
 
     // 4. 최종 전송 처리
     const handleSubmit = () => {
-        // TODO: 실제 DB 연동 API 호출 로직이 들어갈 자리입니다.
+        // 실제 DB 연동 API 호출 로직이 들어갈 자리.
         console.log("DB로 전송할 데이터:", data);
 
-        // 부모 컴포넌트(대시보드)에 성공 알림 -> 모달 닫기
+        // 성공 알림, 모달 닫기
         onUploadSuccess();
         handleClose();
     };
 
     return (
         <>
-            {/* ✦ 대시보드에 항상 표시되는 업로드 버튼 (트리거) */}
+            {/* 대시보드에 표시되는 업로드 버튼 */}
             <button
                 onClick={() => setIsOpen(true)}
                 className="flex items-center gap-2 px-5 py-2.5 bg-lime-50 text-lime-600 font-bold text-sm rounded-xl border border-lime-200 hover:bg-lime-100 transition-all shadow-sm"
@@ -120,7 +120,7 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
                 데이터 엑셀 업로드
             </button>
 
-            {/* ✦ 모달 (Popup) 영역 */}
+            {/* 모달 영역 */}
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
@@ -136,10 +136,8 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
                             </button>
                         </div>
 
-                        {/* 모달 본문 (스크롤 가능 영역) */}
+                        {/* 모달 본문 */}
                         <div className="p-8 overflow-y-auto space-y-8 custom-scrollbar">
-
-                            {/* 업로드 드롭존 */}
                             <section>
                                 <Card className="border-dashed border-2 border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 transition-colors">
                                     <CardContent className="pt-10 pb-10 flex flex-col items-center justify-center space-y-4">
@@ -223,7 +221,7 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
                             )}
                         </div>
 
-                        {/* 모달 푸터 (성공 시에만 액션 버튼 노출) */}
+                        {/* 모달 푸터 */}
                         <div className="px-8 py-5 border-t border-zinc-100 bg-zinc-50 flex justify-end gap-3">
                             <Button variant="ghost" onClick={handleClose} className="text-zinc-500 hover:text-zinc-700">
                                 취소

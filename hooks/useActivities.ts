@@ -25,7 +25,6 @@ export function useActivities() {
                 description: item.description,
                 usage: item.usage,
                 unit: item.unit,
-                // 중첩 객체로 들어온 배출계수 값을 넘겨줍니다.
                 impact: calculateCarbonImpact(item.usage, item.emissionFactor.value, item.unit),
             }));
 

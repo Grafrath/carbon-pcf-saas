@@ -25,7 +25,7 @@ async function main() {
         data: { category: '운송', name: '트럭', value: 3.5, unit: 'ton-km' },
     });
 
-    // 카테고리와 설명을 기반으로 배출계수 ID 매핑
+    // 배출계수 ID 매핑
     const getFactorId = (category: string, description: string) => {
         if (category === '전기') return factorElec.id;
         if (category === '원소재' && description === '플라스틱 1') return factorMat1.id;
@@ -53,7 +53,7 @@ async function main() {
         data: activitiesToInsert,
     });
 
-    console.log(`✅ 총 ${activitiesToInsert.length}개의 활동 데이터가 2024년 기준으로 성공적으로 시딩되었습니다.`);
+    console.log(`총 ${activitiesToInsert.length}개의 활동 데이터가 2024년 기준으로 성공적으로 시딩되었습니다.`);
 }
 
 main()
