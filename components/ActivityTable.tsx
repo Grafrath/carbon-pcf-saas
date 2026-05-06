@@ -17,8 +17,13 @@ interface ActivityItem {
     };
 }
 
-export default function ActivityTable({ data }: { data: ActivityItem[] }) {
-    // 1. 카테고리 목록 추출 (중복 제거)
+interface ActivityTableProps {
+    data: ActivityItem[];
+    onDelete: (id: string) => void;
+}
+
+export default function ActivityTable({ data, onDelete }: ActivityTableProps) {
+    // 1. 카테고리 목록
     const categories = ["전체", ...Array.from(new Set(data.map((item) => item.category)))];
 
     // 2. 현재 선택된 탭 상태 관리
@@ -30,9 +35,15 @@ export default function ActivityTable({ data }: { data: ActivityItem[] }) {
         : data.filter(item => item.category === activeCategory);
 
     // 4. 날짜순 정렬
-    const sortedData = [...filteredData].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
+    const sortedData = [...filteredData].sort((a, b) => {
+        return b.category.localeCompare(a.category);
+    });
+
+    const handleDeleteClick = (id: string) => {
+        if (window.confirm("정말로 이 데이터를 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.")) {
+            onDelete(id);
+        }
+    };
 
     return (
         <section className="space-y-8">
@@ -77,6 +88,7 @@ export default function ActivityTable({ data }: { data: ActivityItem[] }) {
                                 <th className="p-6">활동 설명</th>
                                 <th className="p-6">사용량</th>
                                 <th className="p-6 text-right pr-10">배출량(kg)</th>
+                                <th className="p-6 text-center pr-10">관리</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm">
@@ -98,6 +110,14 @@ export default function ActivityTable({ data }: { data: ActivityItem[] }) {
                                     </td>
                                     <td className="p-6 text-right pr-10 font-black text-lime-600">
                                         {item.impact.weights.kg.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </td>
+                                    <td className="p-6 text-center pr-10">
+                                        <button
+                                            onClick={() => handleDeleteClick(item.id)}
+                                            className="px-3 py-1.5 text-xs font-bold text-red-400 bg-red-50 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors"
+                                        >
+                                            삭제
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

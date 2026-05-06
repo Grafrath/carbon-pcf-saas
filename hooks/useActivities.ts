@@ -62,11 +62,30 @@ export function useActivities() {
         }, []);
     }, [activities]);
 
+    const deleteActivity = async (id: string) => {
+        try {
+            const res = await fetch(`/api/activities/${id}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                throw new Error("삭제에 실패했습니다.");
+            }
+
+            // 삭제 성공 시 화면 갱신
+            await fetchActivities();
+        } catch (error) {
+            console.error(error);
+            alert("데이터 삭제 중 오류가 발생했습니다.");
+        }
+    };
+
     return {
         activities,
         stats,
         chartData,
         loading,
-        refresh: fetchActivities
+        refresh: fetchActivities,
+        deleteActivity,
     };
 }

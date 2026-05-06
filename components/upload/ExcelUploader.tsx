@@ -158,7 +158,7 @@ export default function ExcelUploader({ onUploadSuccess }: ExcelUploaderProps) {
 
     return (
         <>
-            {/* 대시보드에 표시되는 업로드 버튼 */}
+            {/* 업로드 버튼 */}
             <button
                 onClick={() => setIsOpen(true)}
                 className="flex items-center gap-2 px-5 py-2.5 bg-lime-50 text-lime-600 font-bold text-sm rounded-xl border border-lime-200 hover:bg-lime-100 transition-all shadow-sm"
