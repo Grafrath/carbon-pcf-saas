@@ -1,19 +1,33 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
+  # 1. PostgreSQL 데이터베이스 컨테이너
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: carbon_db
     restart: always
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin1234
-      POSTGRES_DB: carbon_pcf_saas
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: carbon_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
+  # 2. Next.js 프론트엔드/API 컨테이너
+  web:
+    build: .
+    container_name: carbon_web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # 로컬호스트(localhost) 대신 컨테이너 이름(db)을 바라보도록 하드코딩
+      DATABASE_URL: "postgresql://admin:password123@db:5432/carbon_db"
+    depends_on:
+      - db
+
+# 데이터베이스 영구 저장을 위한 볼륨 설정
 volumes:
-  postgres_data:
+  pgdata:
