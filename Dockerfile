@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 # 1. 의존성 패키지 및 Prisma 스키마 복사
@@ -19,4 +19,4 @@ RUN yarn build
 EXPOSE 3000
 
 # 6. 실행 명령어: DB 스키마 동기화 후 서버 실행
-CMD ["sh", "-c", "npx prisma db push && yarn start"]
+CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && yarn start"]
